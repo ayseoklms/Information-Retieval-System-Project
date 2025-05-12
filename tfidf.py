@@ -55,7 +55,7 @@ def calculate_doc_score_for_query(query_terms, doc_id, inverted_index, total_doc
     Eğer q (sorgu terim ağırlığı) 1 ise: ∑ tfidf(d,w)
     """
     score = 0.0
-    processed_query_terms = list(set(query_terms)) # Benzersiz sorgu terimleri
+    processed_query_terms = list(set(query_terms)) 
 
     for term in processed_query_terms:
         # Terimin dokümandaki frekansını al (tf(w,d))

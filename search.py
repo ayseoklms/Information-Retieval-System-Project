@@ -117,47 +117,41 @@ class SearchEngine:
             print("TF-IDF için sorgu işlenemedi veya boş.")
             return []
 
-        N = self.ii.total_docs # Toplam doküman sayısı
+        N = self.ii.total_docs 
         if N == 0:
             print("TF-IDF için indekste hiç doküman bulunmuyor.")
             return []
             
         doc_scores = defaultdict(float)
 
-        # Aday dokümanları belirle: Sorgudaki terimlerden en az birini içeren dokümanlar
+       
         candidate_docs = set()
         for term in processed_query_terms:
             candidate_docs.update(self.ii.get_postings_list(term))
 
         if not candidate_docs:
-            # print("Sorgudaki terimleri içeren hiçbir aday doküman bulunamadı.")
+    
             return []
 
-        # Her aday doküman için sorguya göre TF-IDF skorunu hesapla
         for doc_id in candidate_docs:
-            # tfidf.py'deki fonksiyonu çağır
+        
             score = calculate_doc_score_for_query(
-                processed_query_terms, # İşlenmiş sorgu terimleri listesi
-                doc_id,                # Değerlendirilecek doküman ID'si
-                self.ii,               # InvertedIndex nesnesi (tf, df bilgileri için)
-                N                      # Toplam doküman sayısı
+                processed_query_terms, 
+                doc_id,                
+                self.ii,               
+                N                      
             )
-            if score > 0: # Sadece pozitif skorlu dokümanları dikkate al
+            if score > 0: 
                 doc_scores[doc_id] = score
         
-        # Skorlara göre dokümanları büyükten küçüğe sırala
+        
         sorted_docs_with_scores = sorted(doc_scores.items(), key=lambda item: item[1], reverse=True)
         
         return sorted_docs_with_scores[:top_n]
 
 
 if __name__ == '__main__':
-    # Bu kısım, search.py'yi doğrudan çalıştırdığınızda test amaçlıdır.
-    # main.py içinden çağrıldığında bu kısım çalışmaz.
-    
-    # Örnek bir InvertedIndex ve utils fonksiyonları gerekir.
-    # Bu yüzden, tam bir test için main.py'yi çalıştırmak daha uygundur.
-    # Ancak burada basit bir mock InvertedIndex oluşturabiliriz.
+  
 
     class MockInvertedIndexForSearch:
         def __init__(self):
@@ -191,10 +185,7 @@ if __name__ == '__main__':
 
     print("Search.py doğrudan çalıştırılıyor (Test Modu)...\n")
     
-    # utils.py'den preprocess_text'i import et (normalde dosya başında yapılır)
-    # from utils import preprocess_text 
-    # tfidf.py'den calculate_doc_score_for_query'i import et
-    # from tfidf import calculate_doc_score_for_query
+
 
     mock_ii_instance = MockInvertedIndexForSearch()
     search_engine_instance = SearchEngine(mock_ii_instance)
@@ -203,11 +194,11 @@ if __name__ == '__main__':
     print("--- Boolean Arama Testleri ---")
     query_bool1 = "iyi film"
     results_and = search_engine_instance.boolean_search(query_bool1, operator='AND')
-    print(f"Sorgu (AND) '{query_bool1}': {results_and} (Beklenen: ['doc1', 'doc3'] veya ['doc3', 'doc1'])") # Sıra değişebilir
+    print(f"Sorgu (AND) '{query_bool1}': {results_and} (Beklenen: ['doc1', 'doc3'] veya ['doc3', 'doc1'])") 
 
-    query_bool2 = "aksiyon veya korkunc" # 'veya' kelimesi stopword olabilir, işlenmiş haline bakın
+    query_bool2 = "aksiyon veya korkunc" 
     # preprocess_text("aksiyon veya korkunc") -> ['aksiyon', 'korkunc'] (eğer 'veya' stopword ise)
-    results_or = search_engine_instance.boolean_search("aksiyon korkunc", operator='OR') # işlenmiş terimleri verelim
+    results_or = search_engine_instance.boolean_search("aksiyon korkunc", operator='OR')
     print(f"Sorgu (OR) 'aksiyon korkunc': {results_or} (Beklenen: doc2, doc3, doc5, doc4, doc6 içeren bir set)")
 
     query_bool_nonexist = "bilinmeyen terim film"
@@ -218,18 +209,14 @@ if __name__ == '__main__':
     print(f"Sorgu (OR) '{query_bool_nonexist}': {results_nonexist_or} (Beklenen: ['doc1', 'doc3', 'doc4'])")
 
 
-    # TF-IDF Arama Testi
-    # calculate_doc_score_for_query mock'lanmadığı için,
-    # ve tfidf.py'nin doğru şekilde import edildiğini varsayarak çalışır.
-    # Eğer tfidf.py yoksa, placeholder fonksiyon 0 döndürür.
     print("\n--- TF-IDF Arama Testleri ---")
-    query_tfidf1 = "iyi aksiyon filmi" # 'filmi' -> 'film' olabilir stemming ile
+    query_tfidf1 = "iyi aksiyon filmi" 
     
-    # Eğer tfidf.py doğru import edilmediyse, bu kısım sadece 0 skorları verebilir.
+   
     try:
         from tfidf import calculate_doc_score_for_query
         if 'calculate_doc_score_for_query' not in globals() or globals()['calculate_doc_score_for_query'].__name__ == 'calculate_doc_score_for_query': # Placeholder kontrolü
-             pass # Gerçek fonksiyon import edildi
+             pass 
         else:
             print("UYARI: TF-IDF için gerçek 'calculate_doc_score_for_query' yüklenemedi. Test sonuçları yanıltıcı olabilir.")
     except ImportError:
@@ -244,17 +231,7 @@ if __name__ == '__main__':
     else:
         print("  Sonuç bulunamadı veya skorlar 0.")
         
-    # Basit bir sorgu ile IDF'nin etkisini görmek için:
-    # "iyi" terimi 3 dokümanda, "kaybi" terimi 1 dokümanda geçiyor.
-    # IDF(iyi) < IDF(kaybi) olmalı.
-    # tf(iyi, doc3)=3, tf(kaybi, doc6)=3.
-    # TF-IDF(iyi, doc3) vs TF-IDF(kaybi, doc6) karşılaştırılabilir.
-    # IDF(iyi) = log(6/3) = log(2) = 0.693
-    # IDF(kaybi) = log(6/1) = log(6) = 1.791
-    # tf_log(3) = 1 + log(3) = 2.098
-    # TF-IDF(iyi, doc3) = 2.098 * 0.693 = 1.454
-    # TF-IDF(kaybi, doc6) = 2.098 * 1.791 = 3.757
-    # Dolayısıyla "kaybi" içeren sorgular, "iyi" içerenlere göre daha yüksek skorlar üretebilir (tek terimli sorgularda).
+    
     
     ranked_results_kaybi = search_engine_instance.tfidf_rank("kaybi", top_n=1)
     print(f"Sorgu (TF-IDF) 'kaybi':")

@@ -1,12 +1,11 @@
 from collections import defaultdict
-# import numpy as np # Şimdilik numpy'a ihtiyaç yok burada
+
 
 class InvertedIndex:
     def __init__(self):
-        # self.index yapısı: {term: {'postings': {doc_id: tf}, 'df': df_value, 'total_corpus_freq': total_freq_value}}
         self.index = defaultdict(lambda: {'postings': defaultdict(int), 'df': 0, 'total_corpus_freq': 0})
-        self.documents_tokens = {} # {doc_id: [processed_tokens]} - aslında buna burada doğrudan ihtiyaç yok, build_index'e parametre olarak geliyor
-        self.doc_lengths = defaultdict(int) # {doc_id: length}
+        self.documents_tokens = {} 
+        self.doc_lengths = defaultdict(int) 
         self.total_docs = 0
         self.avg_doc_length = 0
 
@@ -14,7 +13,7 @@ class InvertedIndex:
         """
         processed_documents_dict: {doc_id: [token1, token2, ...]}
         """
-        # self.documents_tokens = processed_documents_dict # Saklamak isteğe bağlı
+       
         self.total_docs = len(processed_documents_dict)
         total_length_sum = 0
 
@@ -29,8 +28,8 @@ class InvertedIndex:
             
             for term, tf_in_doc in term_counts_in_doc.items():
                 self.index[term]['postings'][doc_id] = tf_in_doc
-                self.index[term]['df'] += 1 # Bu terimi içeren doküman sayısını artır
-                self.index[term]['total_corpus_freq'] += tf_in_doc # Terimin tüm korpustaki toplam frekansını artır
+                self.index[term]['df'] += 1 
+                self.index[term]['total_corpus_freq'] += tf_in_doc 
         
         if self.total_docs > 0:
             self.avg_doc_length = total_length_sum / self.total_docs
@@ -87,7 +86,7 @@ if __name__ == '__main__':
 
     IMDB_DATA_PATH = r'C:\Users\ayseo\OneDrive\Masaüstü\bilgi-erisim-sistemleri-proje\data'
     
-    # Küçük bir alt küme ile test
+   
     raw_documents_full = load_documents_imdb(IMDB_DATA_PATH)
     if raw_documents_full:
         sample_doc_ids = list(raw_documents_full.keys())[:100] # İlk 100 doküman

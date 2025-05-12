@@ -9,13 +9,13 @@ def precision_recall_f1(retrieved_doc_ids, relevant_doc_ids):
     retrieved_set = set(retrieved_doc_ids)
     relevant_set = set(relevant_doc_ids)
 
-    if not relevant_set: # Eğer ground truth boşsa, metrikler anlamsızdır (veya 0 kabul edilebilir)
+    if not relevant_set: 
         return 0.0, 0.0, 0.0
 
     true_positives = len(retrieved_set.intersection(relevant_set))
     
     precision = true_positives / len(retrieved_set) if len(retrieved_set) > 0 else 0.0
-    recall = true_positives / len(relevant_set) # relevant_set boş değil kontrolü yukarıda yapıldı
+    recall = true_positives / len(relevant_set) 
     f1 = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
     
     return precision, recall, f1
@@ -40,11 +40,7 @@ def average_precision(retrieved_ranked_doc_ids, relevant_doc_ids):
             num_relevant_found_so_far +=1
             precision_at_k = num_relevant_found_so_far / (i + 1)
             sum_precisions += precision_at_k
-            
-    # Eğer hiç ilgili doküman bulunamadıysa AP 0'dır.
-    # Eğer ilgili dokümanlar var ama hiçbiri retrieve edilmediyse de 0 olmalı.
-    # sum_precisions sadece retrieve edilen ilgili dokümanlar için hesaplanır.
-    # Bölme işlemi toplam ilgili doküman sayısına göre yapılır.
+  
     return sum_precisions / len(relevant_set) if len(relevant_set) > 0 else 0.0
 
 
@@ -63,8 +59,7 @@ def mean_average_precision(all_query_results_ranked_ids, all_relevant_docs_sets)
     for i in range(len(all_query_results_ranked_ids)):
         retrieved_ranked_doc_ids = all_query_results_ranked_ids[i]
         relevant_doc_ids_set = all_relevant_docs_sets[i]
-        if not relevant_doc_ids_set: # Bu sorgu için ground truth yoksa atla veya 0 kabul et
-            # print(f"Uyarı: Sorgu {i+1} için ground truth boş, AP 0 olarak kabul ediliyor.")
+        if not relevant_doc_ids_set: 
             ap_scores.append(0.0)
             continue
         ap = average_precision(retrieved_ranked_doc_ids, relevant_doc_ids_set)
